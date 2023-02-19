@@ -1,17 +1,42 @@
-use clap::Parser;
+use std::{env, fs, process};
+use std::fs::ReadDir;
 
-/// Очистка и сортировка файлов в папке
-#[derive(Parser)]
-struct Cli {
-    /// Переместить файлы в соответствующие их типу папки
-    #[arg(short, long)]
-    r#move: bool,
+use cleanup::{display_error, path_is_file};
 
-    /// По умолчанию определять тип файла по его расширению (если не указан, программа сначала попытается угадать действительный тип файла. Если этого сделать не удастся, будет опираться на расширение файла). Если расширение файла отсутствует, тип будет считаться неопределенным.
-    #[arg(short, long)]
-    extension: bool,
-}
+
+mod args;
 
 fn main() {
-    let args = Cli::parse();
+    let files = enumerate_files();
+
+    for file in files {
+        let path = file.unwrap().path();
+
+        if path_is_file(&path) {
+            match &path.extension() {
+                None => {
+                    display_error(&format!("файл \"{}\" не имеет расширения.",
+                                            path.file_name()
+                                                .unwrap()
+                                                .to_string_lossy()
+                    ))
+                }
+
+                Some(extension) => {
+                    println!("{}", extension.to_string_lossy());
+                }
+            }
+        }
+    }
+}
+
+fn enumerate_files() -> ReadDir {
+    let files = match fs::read_dir(env::current_dir().unwrap()) {
+        Ok(value) => { value }
+        Err(_) => {
+            display_error(&format!("не удалось перечислить файлы в текущей папке"));
+            process::exit(1);
+        }
+    };
+    files
 }
