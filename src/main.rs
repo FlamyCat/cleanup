@@ -4,6 +4,7 @@ use cleanup::{display_warning, path_is_file};
 
 mod args;
 mod moving_rules;
+mod json;
 
 fn main() {
     let files = cleanup::enumerate_files();
@@ -57,7 +58,7 @@ fn handle_file_extension(path: &&DirEntry, value: &str) {
         "jpg" | "jpeg" | "png" | "heic" | "tga" | "dds" => moving_rules::move_image(&path),
 
         _ => {
-            display_warning(&format!("файл {} имеет неизвестный тип и будет перемещен в папку \"Прочее\".", &path.file_name().to_str().unwrap()));
+            display_warning(&format!("файл \"{}\" имеет неизвестный тип и будет перемещен в папку \"Прочее\".", &path.file_name().to_str().unwrap()));
             moving_rules::move_misc(&path);
         }
     }
