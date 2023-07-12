@@ -5,7 +5,7 @@ use file_format::{FileFormat, Kind};
 
 use args::Args;
 use args::Parser;
-use cleanup::{display_error, display_warning, move_file};
+use cleanup::{display_error, display_warning, move_file_to_dir};
 
 mod args;
 
@@ -91,7 +91,11 @@ fn main() -> ExitCode {
             }
         };
 
-        move_file(&file, destination);
+        let result = move_file_to_dir(&mut file.path(), destination);
+
+        if let Err(e) = result {
+            display_error(format!("Ошибка при перемещении файла \"{}\" ({})", file.file_name().to_string_lossy(), e).as_str())
+        }
     }
 
     ExitCode::SUCCESS

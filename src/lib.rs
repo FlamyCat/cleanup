@@ -1,49 +1,73 @@
-use std::path::{Path, PathBuf};
-use std::fs::{DirEntry, metadata, ReadDir};
+use std::{fs, io};
+use std::io::ErrorKind;
+use std::path::PathBuf;
+
 use ansi_term::Color::*;
-use std::{env, fs, process};
 
-pub fn path_is_file(path: &PathBuf) -> bool {
-    metadata(&path.display().to_string()).unwrap().is_file()
-}
-
+/// Выводит сообщение об ошибке.
+///
+/// # Аргументы
+///
+/// * `message`: сообщение об ошибке
+///
 pub fn display_error(message: &str) {
     println!("{}: {}", Red.paint("Ошибка"), message);
 }
 
+/// Выводит предупреждение.
+///
+/// # Аргументы
+///
+/// * `message`: сообщение
+///
+///
 pub fn display_warning(message: &str) {
     println!("{}: {}", Yellow.paint("Предупреждение"), message);
 }
 
-pub fn enumerate_files() -> ReadDir {
-    let files = match fs::read_dir(env::current_dir().unwrap()) {
-        Ok(value) => { value }
-        Err(_) => {
-            display_error(&format!("не удалось перечислить файлы в текущей папке"));
-            process::exit(1);
-        }
-    };
-    files
-}
+/// Создает новую директорию по заданному пути.
+///
+/// # Аргументы
+///
+/// * `path`: путь
+///
+/// # Ошибки
+///
+/// Возвращает ошибку, если у пользователя нет прав на создание директории или операция была прервана.
+///
+fn create_dir(path: &PathBuf) -> io::Result<()> {
+    let result = fs::create_dir(path);
 
-pub fn move_file(path: &&DirEntry, new_directory: &str) {
-    create_directory(&new_directory);
-
-    let destination = get_destination(path, new_directory);
-    if let Err(e) = fs::rename(&path.file_name(), &destination) {
-        display_error(&format!("не удалось переместить файл \"{}\" в папку \"{}\" ({})", path.file_name().to_string_lossy(), new_directory, e.to_string()))
-    }
-}
-
-fn create_directory(directory: &&str) {
-    let path_to_new_folder = format!("{}/{}", env::current_dir().unwrap().to_str().unwrap(), directory);
-    if !Path::new(&path_to_new_folder).exists() {
-        if let Err(e) = fs::create_dir(&path_to_new_folder) {
-            display_error(&format!("не удалось создать папку \"{}\" ({})", directory, e.to_string()));
+    if let Err(e) = &result {
+        match e.kind() {
+            ErrorKind::PermissionDenied | ErrorKind::Interrupted => {
+                return result;
+            }
+            _ => {}
         }
     }
+
+    Ok(())
 }
 
-fn get_destination(path_to_file: &DirEntry, new_folder: &str) -> String {
-    format!("{}/{}/{}", env::current_dir().unwrap().display(), new_folder, path_to_file.file_name().to_string_lossy())
+/// Перемещает файл в указанную директорию. Если такая не существует, функция ее создает.
+///
+/// # Аргументы
+///
+/// * `path_to_dir`: полный путь до новой родительской папки
+/// * `path_to_file`: полный путь до файла
+///
+pub fn move_file_to_dir(path_to_dir: &mut PathBuf, path_to_file: &str) -> io::Result<()> {
+    let path_to_file = PathBuf::from(path_to_file);
+
+    if path_to_dir.exists() {
+        create_dir(path_to_dir)?;
+    }
+
+    let file_name = path_to_file.file_name().unwrap();
+    path_to_dir.push(file_name);
+
+    fs::rename(path_to_file, path_to_dir)?;
+
+    Ok(())
 }
