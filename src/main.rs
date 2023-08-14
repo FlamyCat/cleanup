@@ -31,7 +31,7 @@ fn main() -> ExitCode {
         let file_format = FileFormat::from_file(file.file_name());
 
         if let Err(_) = file_format {
-            display_warning(format!("ошибка при получении формата файла \"{}\", файл будет пропущен.", file.file_name().to_string_lossy()).as_str());
+            display_warning(&format!("ошибка при получении формата файла \"{}\", файл будет пропущен.", file.file_name().to_string_lossy()));
             continue;
         }
 
@@ -94,7 +94,7 @@ fn main() -> ExitCode {
         let result = move_file_to_dir(&mut file.path(), destination);
 
         if let Err(e) = result {
-            display_error(format!("Ошибка при перемещении файла \"{}\" ({})", file.file_name().to_string_lossy(), e).as_str())
+            display_error(&format!("Ошибка при перемещении файла \"{}\" ({})", file.file_name().to_string_lossy(), e))
         }
     }
 

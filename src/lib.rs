@@ -20,7 +20,6 @@ pub fn display_error(message: &str) {
 ///
 /// * `message`: сообщение
 ///
-///
 pub fn display_warning(message: &str) {
     println!("{}: {}", Yellow.paint("Предупреждение"), message);
 }
