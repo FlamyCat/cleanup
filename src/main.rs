@@ -21,7 +21,7 @@ fn main() -> ExitCode {
         return ExitCode::from(1);
     };
 
-    for file in fs::read_dir(files).unwrap() {
+    for file in fs::read_dir(&files).unwrap() {
         let file = file.unwrap();
 
         if file.metadata().unwrap().is_dir() {
@@ -38,7 +38,7 @@ fn main() -> ExitCode {
         let file_format = file_format.unwrap();
 
         let destination = match file_format.kind() {
-            Kind::Application | Kind::Geospatial | Kind::Rom => {
+            Kind::Application | Kind::Geospatial | Kind::Rom | Kind::Syndication => {
                 "Другое"
             }
             Kind::Archive => {
@@ -91,7 +91,10 @@ fn main() -> ExitCode {
             }
         };
 
-        let result = move_file_to_dir(&mut file.path(), destination);
+        let mut destination_full_path = PathBuf::from(&files);
+        destination_full_path.push(destination);
+
+        let result = move_file_to_dir(&mut destination_full_path, file.path());
 
         if let Err(e) = result {
             display_error(&format!("Ошибка при перемещении файла \"{}\" ({})", file.file_name().to_string_lossy(), e))

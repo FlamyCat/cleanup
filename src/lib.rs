@@ -56,10 +56,8 @@ fn create_dir(path: &PathBuf) -> io::Result<()> {
 /// * `path_to_dir`: полный путь до новой родительской папки
 /// * `path_to_file`: полный путь до файла
 ///
-pub fn move_file_to_dir(path_to_dir: &mut PathBuf, path_to_file: &str) -> io::Result<()> {
-    let path_to_file = PathBuf::from(path_to_file);
-
-    if path_to_dir.exists() {
+pub fn move_file_to_dir(path_to_dir: &mut PathBuf, path_to_file: PathBuf) -> io::Result<()> {
+    if !path_to_dir.exists() {
         create_dir(path_to_dir)?;
     }
 
