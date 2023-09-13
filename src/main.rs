@@ -1,4 +1,5 @@
 use std::{env, fs};
+use std::path::PathBuf;
 use std::process::ExitCode;
 
 use file_format::{FileFormat, Kind};
@@ -88,6 +89,9 @@ fn main() -> ExitCode {
             }
             Kind::Video => {
                 "Видео"
+            }
+            Kind::Database => {
+                "Базы данных"
             }
         };
 
