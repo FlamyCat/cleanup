@@ -14,7 +14,7 @@ version = "4.1.4"
 features = ["derive"]
 
 [dependencies.file-format]
-version = "0.20.0"
+version = "0.22.0"
 features = ["reader"]
 
 [dependencies.trash]
