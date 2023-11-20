@@ -3,10 +3,11 @@ use std::path::PathBuf;
 use std::process::ExitCode;
 
 use file_format::{FileFormat, Kind};
+use regex::Regex;
 
 use args::Args;
 use args::Parser;
-use cleanup::{display_error, display_warning, move_file_to_dir};
+use cleanup::{display_error, display_warning, move_file_to_dir, try_to_delete_file_or_dir};
 
 mod args;
 
@@ -24,6 +25,18 @@ fn main() -> ExitCode {
 
     for file in fs::read_dir(&files).unwrap() {
         let file = file.unwrap();
+
+        if let Some(pattern) = &args.deletion_pattern {
+            let file_was_deleted = try_to_delete_file_or_dir(&file.path(), Regex::new(pattern).unwrap());
+            if file_was_deleted {
+                if file.path().is_dir() {
+                    println!("Директория \"{}\" была удалена", file.file_name().to_string_lossy());
+                } else {
+                    println!("Файл \"{}\" был удален", file.file_name().to_string_lossy());
+                }
+                continue;
+            }
+        };
 
         if file.metadata().unwrap().is_dir() {
             continue;

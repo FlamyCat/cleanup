@@ -4,6 +4,10 @@ pub use clap::Parser;
 #[derive(Parser)]
 pub(crate) struct Args {
     /// Директория для очистки
+    #[arg(long)]
+    pub dir: Option<String>,
+
+    /// Регулярное выражение, по которому осуществляется поиск файлов и папок для удаления
     #[arg(short, long)]
-    pub dir: Option<String>
+    pub deletion_pattern: Option<String>
 }

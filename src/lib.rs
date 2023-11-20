@@ -1,8 +1,9 @@
 use std::{fs, io};
 use std::io::ErrorKind;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use ansi_term::Color::*;
+use regex::Regex;
 
 /// Выводит сообщение об ошибке.
 ///
@@ -67,4 +68,29 @@ pub fn move_file_to_dir(path_to_dir: &mut PathBuf, path_to_file: PathBuf) -> io:
     fs::rename(path_to_file, path_to_dir)?;
 
     Ok(())
+}
+
+
+/// Проверяет, можно ли удалить файл или директорию по заданному пути.
+/// Если это можно сделать, файл или директория переносятся в корзину.
+/// Если при удалении файла/директории возникает ошибка, функция ее обрабатывает.
+///
+/// # Аргументы
+///
+/// * `path_to_dir_or_file`: путь до файла или директории.
+/// * `pattern`: регулярное выражение, по которому проверяется, подлежит ли файл удалению.
+///
+/// # Возвращаемое значение
+/// Истина, если удаление прошло успешно.
+///
+pub fn try_to_delete_file_or_dir(path_to_dir_or_file: &Path, pattern: Regex) -> bool {
+    if pattern.is_match(path_to_dir_or_file.as_os_str().to_str().unwrap().trim()) {
+        let result = trash::delete(path_to_dir_or_file);
+        if let Err(e) = result {
+            display_error(&format!("Ошибка при удалении {}, ({})", path_to_dir_or_file.to_str().unwrap(), e));
+            return false;
+        }
+        return true;
+    }
+    return false;
 }

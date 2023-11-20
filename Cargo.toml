@@ -1,12 +1,13 @@
 [package]
 name = "cleanup"
-version = "1.0.0"
+version = "1.1.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 ansi_term = "0.12.1"
+regex = "1.10.2"
 
 [dependencies.clap]
 version = "4.1.4"
@@ -15,3 +16,6 @@ features = ["derive"]
 [dependencies.file-format]
 version = "0.20.0"
 features = ["reader"]
+
+[dependencies.trash]
+version = "3.1.2"
